@@ -40,13 +40,13 @@ def n1_anal(x):
 
 
 # Define constants
-Msun = 1.9*10**33 						# gram
+Msun = 1.99*10**33 						# gram
 Mns = 1.4 * Msun						# gram
-radius = 1000000						# cm
+radiusNS = 1000000						# cm
 c = 2.99792458*10**10 					# cm
 hbar = 1.0546*10**-27 					# erg*s
 mp = 1.6726*10**-24 					# g
-G = 6.6743*10**8 						#cm3 g-1 s-2
+G = 6.6743*10**-8 						#cm3 g-1 s-2
 mueWD = 2
 
 ##Ks = ......
@@ -63,8 +63,10 @@ a = 1.
 
 # Some initializations
 index = 0
+ksi1 = []
 sol = []
 theta = []
+phi = []
 k = []
 rhoPerRhoC = []
 
@@ -73,22 +75,26 @@ for n in nvalues:
 	sol.append([])
 	sol[index] = spInt.odeint(ode, y0, ksi, args=(n, a))
 	index += 1
-
+bla = 0
 
 # Purpose of the next piece of code: Only save theta values of zero and higher
 # Loop over all solutions (one for every value of n)
 for j in range(0, index):
 	theta.append([])
+	phi.append([])
 	k.append([])
 	rhoPerRhoC.append([])
 	
 	# Loop over all datapoints per value of n
 	for i in range(0, len(sol[j])):
 		if sol[j][i][0] < 0:
+			ksi1.append(i-1)
+			bla = sol[j][i][1]
 			break
 
 		# Only save positive values of theta (and keep track of index)
 		theta[j].append(sol[j][i][0])
+		phi[j].append(sol[j][i][1])
 
 		# Also save theta**n, since this is rho/rho_c
 		rhoPerRhoC[j].append(sol[j][i][0]**nvalues[j])
@@ -117,9 +123,16 @@ maxDev2, index2 = max(theta[1] - n1[:k[1]+1]), np.argmax(theta[1] - n1[:k[1]+1])
 # print 'Relative deviation from analytical value for n = 0: %f' % (maxDev1 / theta[0][index1])
 # print 'Relative deviation from analytical value for n = 1: %f' % (maxDev2 / theta[1][index2])
 
+	
+meanDensNS = Mns / ((4. / 3) * np.pi * radiusNS**3)
+rhoCentNS = meanDensNS / ((-3. * phi[1][ksi1[1]] / ksi[ksi1[1]]**3))
+
+print '\nAverage density NS: ', meanDensNS, '\nRho center NS: ', rhoCentNS
 
 
-#M_WD = 
+mass_WD = -1 * ( 4 * phi[4][ksi1[3]] / np.sqrt(np.pi) ) * (Kwd / G)**1.5
+
+print 'Mass WD = %.4g Mdot' % float(mass_WD/Msun)
 
 
 

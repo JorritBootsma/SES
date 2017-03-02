@@ -9,6 +9,7 @@ from math import *
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.integrate as spInt
+import scipy.stats as spStat
 from sympy import *
 print ''
 
@@ -56,8 +57,9 @@ Kwd = 3**(1./3) * np.pi**(2./3) * hbar*c / (2**(4./3) * 4 * mp**(4./3))
 
 
 # Input for ode solver
+stepsize = 0.0001
 y0 = [1., 0.]
-ksi = np.arange(0.001, 20, 0.001)
+ksi = np.arange(stepsize, 20, stepsize)
 nvalues = [0, 1, 3./2, 2, 3, 4]
 a = 1.
 
@@ -79,6 +81,7 @@ bla = 0
 
 # Purpose of the next piece of code: Only save theta values of zero and higher
 # Loop over all solutions (one for every value of n)
+
 for j in range(0, index):
 	theta.append([])
 	phi.append([])
@@ -101,7 +104,7 @@ for j in range(0, index):
 
 		k[j] = i
 
-n1x = np.arange(0.0001, 5, 0.0001)
+n1x = np.arange(stepsize, 5, stepsize)
 
 
 
@@ -116,53 +119,174 @@ maxDev2, index2 = max(theta[1] - n1[:k[1]+1]), np.argmax(theta[1] - n1[:k[1]+1])
 
 
 
-# print maxDev1, ', index = ', index1, ', theta value = ', theta[0][index1]
-# print maxDev2, ', index = ', index2, ', theta value = ', theta[1][index2]
-# print ''
+print maxDev1, ', index = ', index1, ', theta value = ', theta[0][index1]
+print maxDev2, ', index = ', index2, ', theta value = ', theta[1][index2]
+print ''
 
-# print 'Relative deviation from analytical value for n = 0: %f' % (maxDev1 / theta[0][index1])
-# print 'Relative deviation from analytical value for n = 1: %f' % (maxDev2 / theta[1][index2])
+print 'Relative deviation from analytical value for n = 0: %f' % (maxDev1 / theta[0][index1])
+print 'Relative deviation from analytical value for n = 1: %f' % (maxDev2 / theta[1][index2])
+
+
+ttestn0 = spStat.ttest_ind(n0[:k[0]+1], theta[0])
+ttestn1 = spStat.ttest_ind(n1[:k[1]+1], theta[1])
+
+ttestn0_rel = spStat.ttest_rel(n0[:k[0]+1], theta[0])
+ttestn1_rel = spStat.ttest_rel(n1[:k[1]+1], theta[1])
+
+# print ttestn0
+# print ttestn1
+
+# print 'rel0 = ', ttestn0_rel
+# print 'rel1 = ', ttestn1_rel
 
 	
 meanDensNS = Mns / ((4. / 3) * np.pi * radiusNS**3)
 rhoCentNS = meanDensNS / ((-3. * phi[1][ksi1[1]] / ksi[ksi1[1]]**3))
 
-print '\nAverage density NS: ', meanDensNS, '\nRho center NS: ', rhoCentNS
+print '\nAverage density NS: %.4g g/cm3 \nRho center NS: %.4g g/cm3' % (meanDensNS, rhoCentNS)
 
 
 mass_WD = -1 * ( 4 * phi[4][ksi1[3]] / np.sqrt(np.pi) ) * (Kwd / G)**1.5
 
-print 'Mass WD = %.4g Mdot' % float(mass_WD/Msun)
+print '\nMass WD = %.4g Mdot\n' % float(mass_WD/Msun)
 
 
 
-fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(20,12))
+# fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(18,12))
 
-# Plot all solutions (one for every value of n)
-for num in range(index): 
-	ax1.plot(ksi[:k[num]+1], theta[num], lw=2, label='n = %.2g' % nvalues[num])
-	ax2.plot(ksi[:k[num]+1], rhoPerRhoC[num], lw=2, label='n = %.2g' % nvalues[num])
+# # Plot all solutions (one for every value of n)
+# for num in range(index): 
+# 	ax1.plot(ksi[:k[num]+1], theta[num], lw=2, label='n = %.2g' % nvalues[num])
+# 	ax2.plot(ksi[:k[num]+1], rhoPerRhoC[num], lw=2, label='n = %.2g' % nvalues[num])
 
-ax1.plot(ksi, n0, linestyle = '--', lw=2, c='black', label='Analytical solution (n=0)')
-ax1.plot(n1x, n1, linestyle = '--', lw=2, c='black', label='Analytical solution (n=1)')
-
-ax3.plot(ksi[:k[0]+1], theta[0] - n0[:k[0]+1], lw=2, label='deviation n = %.2g' % nvalues[0])
-ax3.plot(ksi[:k[1]+1], theta[1] - n1_dev[:k[1]+1], lw=2, label='deviation n = %.2g' % nvalues[1])
-
-# Plot lay-out
-ax1.legend()
-ax1.set_xlabel(r'$\xi$', fontsize=20)
-ax1.set_ylabel(r'$\theta$($\xi$)', fontsize=20)
-ax1.axis([0, 20, 0, 1])
-
-ax2.legend()
-ax2.set_xlabel(r'$\xi$', fontsize=20)
-ax2.set_ylabel(r'$\rho$/$\rho_c$', fontsize=20)
-ax2.axis([0, 10, 0, 1])
-
-ax3.legend()
-ax3.set_xlabel(r'$\xi$', fontsize=20)
-ax3.set_ylabel('Numerical - analytical value', fontsize=20)
+# ax1.plot(ksi, n0, linestyle = '--', lw=2, c='black', label='Analytical solution (n=0)')
+# ax1.plot(n1x, n1, linestyle = '--', lw=2, c='black', label='Analytical solution (n=1)')
 
 
+# # Plot lay-out
+# ax1.legend()
+# ax1.set_title(r'$\theta(\xi)$ for different n', fontsize=20)
+# ax1.set_xlabel(r'$\xi$', fontsize=20)
+# ax1.set_ylabel(r'$\theta$($\xi$)', fontsize=20)
+# ax1.axis([0, 20, 0, 1])
+
+# ax2.legend()
+# ax2.set_title(r'$\frac{\rho}{\rho_c}(\xi)$ for different n', fontsize=20)
+# ax2.set_xlabel(r'$\xi$', fontsize=20)
+# ax2.set_ylabel(r'$\frac{\rho}{\rho_c}$    ', fontsize=25, rotation=0)
+# ax2.axis([0, 10, 0, 1])
+
+# plt.tight_layout()
+# # plt.show()
+
+
+
+# fig2, (ax1, ax2) = plt.subplots(2, 1, figsize=(18,12))
+
+# ax1.axhline(0, color='r', linestyle='dashed', lw=2, label='Zero deviation')
+# ax1.vlines(ksi[:k[0]+1], 0, theta[0] - n0[:k[0]+1], color='blue', lw=2, alpha=0.5, label='deviation n = %.2g' % nvalues[0])
+# ax1.plot(ksi[:k[0]+1], theta[0] - n0[:k[0]+1], 'bo', color='blue', lw=2, label='deviation n = %.2g' % nvalues[0])
+
+# ax2.axhline(0, color='r', linestyle='dashed', lw=2, label='Zero deviation')
+# ax2.vlines(ksi[:k[1]+1], 0, theta[1] - n1_dev[:k[1]+1], color='green', lw=2, alpha=0.5, label='deviation n = %.2g' % nvalues[1])
+# ax2.plot(ksi[:k[1]+1], theta[1] - n1_dev[:k[1]+1], 'bo', color='green', lw=2, label='deviation n = %.2g' % nvalues[1])
+
+# ax1.legend(loc='lower right')
+# ax2.legend(loc='lower right')
+
+# ax1.set_title('Deviation from analytical value for n = 0', fontsize=20)
+# ax1.set_xlabel(r'$\xi$', fontsize=20)
+# ax1.set_ylabel('Numerical - analytical value', fontsize=20)
+
+# ax2.set_title('Deviation from analytical value for n = 1', fontsize=20)
+# ax2.set_xlabel(r'$\xi$', fontsize=20)
+# ax2.set_ylabel('Numerical - analytical value', fontsize=20)
+
+# # if stepsize == 0.1:
+# # 	ax1.axis([0, 3.5, 0, 0.005])
+# # 	ax2.axis([0, 3.5, 0, 0.005])
+# # elif stepsize == 0.01:
+# # 		ax1.axis([0, 3.5, 0, 0.00006])	
+# # 		ax2.axis([0, 3.5, 0, 0.00006])
+# # elif stepsize == 0.001:
+# # 		ax1.axis([0, 3.5, -0.0000018, 0.0000005])	
+# # 		ax2.axis([0, 3.5, -0.0000018, 0.0000005])
+# # elif stepsize == 0.001:
+# # 		ax1.axis([0, 3.5, -0.0000035, 0.0000005])	
+# # 		ax2.axis([0, 3.5, -0.0000035, 0.0000005])
+
+# plt.tight_layout()
+# #plt.show()
+
+
+fig3, (ax1, ax2) = plt.subplots(2, 1, figsize=(18,12))
+
+ax1.vlines(ksi[:k[0]+1], 0, (theta[0] - n0[:k[0]+1])/n0[:k[0]+1], color='blue', lw=2, alpha=0.5)
+ax1.plot(ksi[:k[0]+1], (theta[0] - n0[:k[0]+1])/n0[:k[0]+1], 'bo', color='blue', lw=2, label='deviation n = %.2g' % nvalues[0])
+# if stepsize == 0.1:
+# 	ax1.axhline(0.01, color='r', linestyle='dashed', lw=2, label=r'$1.0\%$ limit')	
+# elif stepsize == 0.01:
+# 	ax1.axhline(0.0001, color='r', linestyle='dashed', lw=2, label=r'$0.01\%$ limit')
+# 	ax1.axhline(0.0005, color='g', linestyle='dashed', lw=2, label=r'$0.05\%$ limit')
+
+ax2.vlines(ksi[:k[1]+1], 0, (theta[1] - n1_dev[:k[1]+1])/n1_dev[:k[1]+1], color='green', lw=2, alpha=0.5)
+ax2.plot(ksi[:k[1]+1], (theta[1] - n1_dev[:k[1]+1])/n1_dev[:k[1]+1], 'bo', color='green', lw=2, label='deviation n = %.2g' % nvalues[1])
+# if stepsize == 0.1:
+# 	ax2.axhline(0.004, color='r', linestyle='dashed', lw=2, label=r'$0.4\%$ limit')	
+# elif stepsize == 0.01:
+# 	ax2.axhline(0.0001, color='r', linestyle='dashed', lw=2, label=r'$0.01\%$ limit')
+# elif stepsize == 0.001:
+# 	ax2.axhline(0.0001, color='r', linestyle='dashed', lw=2, label=r'$0.01\%$ limit')
+# elif stepsize == 0.0001:
+# 	ax2.axhline(0.0001, color='r', linestyle='dashed', lw=2, label=r'$0.01\%$ limit')
+
+ax1.legend(loc='upper left')
+ax2.legend(loc='upper left')
+ax1.grid(lw=1)
+ax2.grid(lw=1)
+
+ax1.set_title('Relative deviation from analytical value for n = 0 (stepsize = %s)' % stepsize, fontsize=20)
+ax1.set_xlabel(r'$\xi$', fontsize=24)
+ax1.set_ylabel(r'$\%$ deviation', fontsize=20)
+ax1.tick_params(labelsize=15)
+
+ax2.set_title('Relative deviation from analytical value for n = 1 (stepsize = %s)' % stepsize, fontsize=20)
+ax2.set_xlabel(r'$\xi$', fontsize=24)
+ax2.set_ylabel(r'$\%$ deviation', fontsize=20)
+ax2.tick_params(labelsize=15)
+
+plt.tight_layout()
 plt.show()
+
+
+
+
+#### COMPARISON WITH ANAL. SOLUTIONS
+# figCOMP, (ax1) = plt.subplots(1, 1, figsize=(10,10))
+
+# # Plot all solutions (one for every value of n)
+# index = 2
+# for num in range(index): 
+# 	ax1.plot(ksi[:k[num]+1], theta[num], lw=3, alpha=0.4, label='n = %.2g' % nvalues[num])
+# 	# ax2.plot(ksi[:k[num]+1], rhoPerRhoC[num], lw=2, label='n = %.2g' % nvalues[num])
+
+# ax1.plot(ksi, n0, linestyle = '--', lw=2, c='darkblue', label='Analytical solution (n=0)')
+# ax1.plot(n1x, n1, linestyle = '--', lw=2, c='darkgreen', label='Analytical solution (n=1)')
+
+
+# # Plot lay-out
+# ax1.legend()
+# ax1.set_title('Comparison with analytical solutions (stepsize = %s)' % (stepsize), fontsize=20)
+# ax1.set_xlabel(r'$\xi$', fontsize=20)
+# ax1.set_ylabel(r'$\theta$($\xi$)', fontsize=20)
+# ax1.axis([0, 3.5, 0, 1])
+# ax1.tick_params(labelsize=15)
+
+# # ax2.legend()
+# # ax2.set_title(r'$\frac{\rho}{\rho_c}(\xi)$ for different n', fontsize=20)
+# # ax2.set_xlabel(r'$\xi$', fontsize=20)
+# # ax2.set_ylabel(r'$\frac{\rho}{\rho_c}$    ', fontsize=25, rotation=0)
+# # ax2.axis([0, 10, 0, 1])
+
+# plt.tight_layout()
+# plt.show()
